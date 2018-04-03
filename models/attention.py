@@ -107,11 +107,12 @@ def multi_head_attention(num_heads,
 
     queries = tf.layers.conv1d(queries, num_units, 1)
     keys = tf.layers.conv1d(memory, num_units, 1)
-    values = memory
+    # We do not apply linear transformation on GST tokens, and reuse
+    # the same tokens for each head.
+    values = tf.tile(tf.expand_dims(memory, axis=1), [1, num_heads, 1, 1])
 
     queries = split_heads(queries, num_heads)
     keys = split_heads(keys, num_heads)
-    values = split_heads(values, num_heads)
 
     if attention_type == 'additive':
       heads, _ = additive_attention(queries, keys, values)

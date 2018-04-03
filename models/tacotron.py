@@ -42,9 +42,11 @@ class Tacotron():
         initializer=tf.truncated_normal_initializer(stddev=0.5))
       embedded_inputs = tf.nn.embedding_lookup(embedding_table, inputs)           # [N, T_in, 256]
 
-      # Global style tokens (GST)
+      # Global style tokens (GST), When using h attention heads, we set
+      # the token embedding size to be 256/h and concatenate the attention
+      # outputs of each head.
       gst_tokens = tf.get_variable(
-        'style_tokens', [hp.num_gst, 256], dtype=tf.float32,
+        'style_tokens', [hp.num_gst, 256 // hp.num_heads], dtype=tf.float32,
         initializer=tf.truncated_normal_initializer(stddev=0.5))
 
       # Encoder
@@ -64,7 +66,7 @@ class Tacotron():
         style_embedding = multi_head_attention(
           num_heads=hp.num_heads,
           queries=tf.expand_dims(reference_embedding, axis=1),                    # [N, 1, 128]
-          memory=tf.tile(tf.expand_dims(gst_tokens, axis=0), [batch_size, 1, 1]), # [N, hp.num_gst, 256]
+          memory=tf.tile(tf.expand_dims(gst_tokens, axis=0), [batch_size, 1, 1]), # [N, hp.num_gst, 256 // hp.num_heads]
           num_units=128)
       else:
         # TODO Add support for reference mode and more effective style control during inference.
