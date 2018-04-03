@@ -70,7 +70,7 @@ def additive_attention(queries, keys, values):
 
   v = tf.get_variable("attention_v", [num_units], dtype=dtype)
   # Singlelayer multilayer perceptron.
-  add = tf.reduce_sum(v * tf.tanh(keys + queries), [-1], keepdims=True)
+  add = tf.reduce_sum(v * tf.tanh(keys + queries), [-1], keep_dims=True)
   # Compute attention weights.
   attn = tf.nn.softmax(add)
   # Compute attention context.
